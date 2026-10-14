@@ -10,15 +10,14 @@
 
 Fill a brief description of this experiment here
 
-<b>Name of Developer | <b> Fill the name of experiment owner here 
+<b>Name of Developer | <b> Krish Jaiswal
 :--|:--|
-<b> Institute | <b>  
-<b> Email id|     <b>  
-<b> Department |  
+<b> Institute | <b>  Rajkiya Engineering College, Banda
+<b> Email id|     <b>  krishjais983@gmail.com
+<b> Department |  Information Technology
 
 ### Contributors List
 
 SrNo | Name | Faculty or Student | Department| Institute | Email id
 :--|:--|:--|:--|:--|:--|
-1 | . | . | . | . | .
-2 | . | . | . | . | .
+1 | Krish Jaiswal | Student | I.T. | REC Banda | krishjais983@gmail.com
