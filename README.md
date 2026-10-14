@@ -1,10 +1,10 @@
 ## Introduction
 
 
-<b>Discipline | <b>Fill your discipline name here
+<b>Discipline | <b>Information Technology
 :--|:--|
-<b> Lab | <b> Fill your lab name here
-<b> Experiment|     <b> Fill your experiment name and number here
+<b> Lab | <b> Physics Lab
+<b> Experiment|     <b> Characterization of Laser Diode Light-Current (L-I) and Spectral Profiles
 
 ### About the Experiment 
 
