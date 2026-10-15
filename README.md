@@ -1,4 +1,4 @@
-## Introduction
+## Introduction 
  
 
 <b>Discipline | <b>Information Technology
@@ -20,4 +20,4 @@ Fill a brief description of this experiment here
 
 SrNo | Name | Faculty or Student | Department| Institute | Email id
 :--|:--|:--|:--|:--|:--|
-1 | Krish Jaiswal | Student | I.T. | REC Banda | krishjais983@gmail.com
+1 | Krish Jaiswal | Student | I.T. | Rajkiya Engineering College, Banda | krishjais983@gmail.com
