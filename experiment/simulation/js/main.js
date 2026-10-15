@@ -1,8 +1,8 @@
-// Laser Diode Parameters
+// Semiconductor Laser Physics Constants
 const I_TH = 25.0; // Threshold Current = 25 mA
 const SLOPE_EFF = 0.42; // mW per mA above threshold
-const SPONT_EFF = 0.007; // Weak emission below threshold
-const PEAK_NM = 650; // 650 nm Red Diode
+const SPONT_EFF = 0.007; // Weak spontaneous efficiency
+const PEAK_NM = 650; // Central wavelength (nm)
 
 let current_mA = 0.0;
 const recordedCurrents = [0];
@@ -11,23 +11,22 @@ const recordedPowers = [0];
 let liChart = null;
 let specChart = null;
 
-// 1. Calculate Optical Power (P) from Current (I)
+// Optical Power Calculation
 function getPower(I) {
   if (I <= 0) return 0;
   if (I <= I_TH) {
-    return I * SPONT_EFF; // Spontaneous emission
+    return I * SPONT_EFF;
   } else {
-    return (I_TH * SPONT_EFF) + (I - I_TH) * SLOPE_EFF; // Stimulated emission (Lasing)
+    return (I_TH * SPONT_EFF) + (I - I_TH) * SLOPE_EFF;
   }
 }
 
-// 2. Generate Spectrum Data
+// Spectrum Calculation
 function getSpectrum(I) {
   const lambdas = [];
   const intensities = [];
   const p = getPower(I);
 
-  // Spectral linewidth collapses when stimulated emission occurs
   const fwhm = (I < I_TH) ? (35 - (I / I_TH) * 10) : Math.max(0.6, 25 / Math.pow(I / I_TH, 2.5));
 
   for (let l = 600; l <= 700; l++) {
@@ -42,7 +41,36 @@ function getSpectrum(I) {
   return { lambdas, intensities, fwhm };
 }
 
-// 3. Set Up Graphs on the Virtual Monitors
+// Procedural Floor & Breadboard Textures (Gives realistic high-definition lab look)
+function generateLabTextures() {
+  // 1. Lab Floor Tiles Texture
+  const fCanvas = document.getElementById('floorCanvas');
+  const fCtx = fCanvas.getContext('2d');
+  fCtx.fillStyle = '#1e2638';
+  fCtx.fillRect(0, 0, 256, 256);
+  fCtx.strokeStyle = '#2b354d';
+  fCtx.lineWidth = 4;
+  fCtx.strokeRect(2, 2, 252, 252);
+  fCtx.strokeStyle = '#151c2a';
+  fCtx.lineWidth = 1;
+  fCtx.strokeRect(0, 0, 256, 256);
+
+  // 2. Optical Breadboard Grid Texture
+  const bCanvas = document.getElementById('breadboardCanvas');
+  const bCtx = bCanvas.getContext('2d');
+  bCtx.fillStyle = '#121721';
+  bCtx.fillRect(0, 0, 256, 256);
+  bCtx.fillStyle = '#06080d';
+  for (let x = 16; x < 256; x += 32) {
+    for (let y = 16; y < 256; y += 32) {
+      bCtx.beginPath();
+      bCtx.arc(x, y, 4, 0, Math.PI * 2);
+      bCtx.fill();
+    }
+  }
+}
+
+// Initialize Dual Virtual Monitors
 function setupCharts() {
   const ctxLI = document.getElementById('liChartCanvas').getContext('2d');
   liChart = new Chart(ctxLI, {
@@ -50,7 +78,7 @@ function setupCharts() {
     data: {
       labels: recordedCurrents,
       datasets: [{
-        label: 'Power (mW)',
+        label: 'Power P (mW)',
         data: recordedPowers,
         borderColor: '#38bdf8',
         backgroundColor: 'rgba(56, 189, 248, 0.25)',
@@ -61,10 +89,10 @@ function setupCharts() {
     options: {
       animation: false,
       scales: {
-        x: { title: { display: true, text: 'Current (mA)', color: '#fff' }, ticks: { color: '#ccc' } },
-        y: { title: { display: true, text: 'Power (mW)', color: '#fff' }, min: 0, max: 20, ticks: { color: '#ccc' } }
+        x: { title: { display: true, text: 'Current I (mA)', color: '#fff' }, ticks: { color: '#94a3b8' } },
+        y: { title: { display: true, text: 'Power P (mW)', color: '#fff' }, min: 0, max: 20, ticks: { color: '#94a3b8' } }
       },
-      plugins: { legend: { labels: { color: '#fff' } } }
+      plugins: { legend: { labels: { color: '#ffffff' } } }
     }
   });
 
@@ -85,15 +113,15 @@ function setupCharts() {
     options: {
       animation: false,
       scales: {
-        x: { title: { display: true, text: 'Wavelength (nm)', color: '#fff' }, ticks: { color: '#ccc' } },
-        y: { title: { display: true, text: 'Intensity', color: '#fff' }, min: 0, max: 20, ticks: { color: '#ccc' } }
+        x: { title: { display: true, text: 'Wavelength (nm)', color: '#fff' }, ticks: { color: '#94a3b8' } },
+        y: { title: { display: true, text: 'Intensity', color: '#fff' }, min: 0, max: 20, ticks: { color: '#94a3b8' } }
       },
-      plugins: { legend: { labels: { color: '#fff' } } }
+      plugins: { legend: { labels: { color: '#ffffff' } } }
     }
   });
 }
 
-// 4. Redraw 3D Monitors in VR
+// Refresh VR Screens
 function refreshMonitors() {
   const liPlane = document.querySelector('#li-screen');
   const specPlane = document.querySelector('#spec-screen');
@@ -107,42 +135,53 @@ function refreshMonitors() {
     if (mat.map) mat.map.needsUpdate = true;
   }
 }
-
-// 5. Update Everything When Current Changes
+// Simulation & UI Loop
 function updateSimulation() {
   const p = getPower(current_mA);
   const spec = getSpectrum(current_mA);
 
-  // Update Driver LCD
+  // LCD Readout
   const lcd = document.querySelector('#lcd-display');
   if (lcd) lcd.setAttribute('value', I: ${current_mA.toFixed(1)} mA\nP: ${p.toFixed(2)} mW);
 
-  // Update Beam Appearance
+  // Laser Beam Intensity & Collimation
   const beam = document.querySelector('#laser-beam');
   if (beam) {
     if (current_mA <= 0) {
       beam.setAttribute('material', 'opacity', 0.0);
     } else if (current_mA < I_TH) {
       beam.setAttribute('radius', 0.007);
-      beam.setAttribute('material', 'opacity', 0.15); // faint spontaneous light
+      beam.setAttribute('material', 'opacity', 0.16);
+      beam.setAttribute('color', '#f87171');
     } else {
-      beam.setAttribute('radius', 0.0035);
-      beam.setAttribute('material', 'opacity', Math.min(1.0, 0.5 + (current_mA - I_TH) * 0.03)); // coherent bright beam
-    }
-  }
-  // Update Theory Whiteboard Status
-  const status = document.querySelector('#theory-live-status');
-  if (status) {
-    if (current_mA <= 0) {
-      status.setAttribute('value', STATE: [OFF]\n- Current: 0.0 mA\n- Click [+5 mA] to start.);
-    } else if (current_mA < I_TH) {
-      status.setAttribute('value', STATE: SPONTANEOUS EMISSION\n- Below threshold (I < 25 mA)\n- Wide LED-like band (~${spec.fwhm.toFixed(1)} nm));
-    } else {
-      status.setAttribute('value', STATE: LASING (STIMULATED EMISSION)\n- Above threshold (I >= 25 mA)\n- Narrow laser linewidth (~${spec.fwhm.toFixed(2)} nm));
+      beam.setAttribute('radius', 0.0032);
+      const intensity = Math.min(1.0, 0.5 + (current_mA - I_TH) * 0.035);
+      beam.setAttribute('material', 'opacity', intensity);
+      beam.setAttribute('color', '#ff0000');
     }
   }
 
-  // Record data and update charts
+  // Live HUD Status (Clear & Non-Overlapping)
+  const title = document.querySelector('#live-state-title');
+  const desc = document.querySelector('#live-state-desc');
+
+  if (title && desc) {
+    if (current_mA <= 0) {
+      title.setAttribute('value', 'CURRENT EMISSION: [SYSTEM OFF / IDLE]');
+      title.setAttribute('color', '#94a3b8');
+      desc.setAttribute('value', 'Injection Current: 0.0 mA | Threshold: 25.0 mA\nClick "+5 mA" or "+1 mA" to start characterization.');
+    } else if (current_mA < I_TH) {
+      title.setAttribute('value', 'CURRENT EMISSION: SPONTANEOUS (LED MODE)');
+      title.setAttribute('color', '#fbbf24');
+      desc.setAttribute('value', Current: ${current_mA.toFixed(1)} mA (< Ith 25mA) | Power: ${p.toFixed(3)} mW\nBroadband emission with large linewidth (FWHM: ~${spec.fwhm.toFixed(1)} nm).);
+    } else {
+      title.setAttribute('value', 'CURRENT EMISSION: STIMULATED (LASING!)');
+      title.setAttribute('color', '#22c55e');
+      desc.setAttribute('value', Current: ${current_mA.toFixed(1)} mA (>= Ith 25mA) | Power: ${p.toFixed(2)} mW\nPopulation inversion achieved! Sharp coherent peak (FWHM: ${spec.fwhm.toFixed(2)} nm).);
+    }
+  }
+
+  // Update Data Points
   recordedCurrents.push(parseFloat(current_mA.toFixed(1)));
   recordedPowers.push(parseFloat(p.toFixed(3)));
   liChart.update();
@@ -154,8 +193,9 @@ function updateSimulation() {
   refreshMonitors();
 }
 
-// Button Events
+// Event Bindings
 window.addEventListener('DOMContentLoaded', () => {
+  generateLabTextures();
   setupCharts();
   updateSimulation();
 
@@ -189,4 +229,5 @@ window.addEventListener('DOMContentLoaded', () => {
     updateSimulation();
   });
 });
+
 

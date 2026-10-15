@@ -5,142 +5,185 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Laser Diode VR Lab</title>
 
-  <!-- 1. Style file -->
   <link rel="stylesheet" href="css/main.css">
 
-  <!-- 2. VR Frameworks -->
+  <!-- A-Frame VR Framework & Locomotion -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.2.0/dist/aframe-extras.min.js"></script>
-  <!-- Chart.js to draw graphs in VR -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- 3. Physics Script -->
   <script src="js/main.js" defer></script>
 </head>
 <body>
 
-  <!-- Instructions when viewed on PC -->
+  <!-- Desktop Info Overlay -->
   <div class="guide-box">
-    <strong>Laser Diode VR Lab</strong><br>
-    • <strong>Walk:</strong> W, A, S, D / Left VR Thumbstick<br>
-    • <strong>Look:</strong> Drag Mouse / Headset movement<br>
-    • <strong>Interact:</strong> Click the buttons on the table
+    <div style="font-weight: bold; color: #38bdf8; margin-bottom: 4px;">LASER DIODE VR LAB</div>
+    • <strong>Walk:</strong> W, A, S, D / Left VR Stick<br>
+    • <strong>Turn:</strong> Mouse Drag / Right VR Stick<br>
+    • <strong>Interact:</strong> Click table buttons (+5mA, -5mA)
   </div>
 
-  <!-- Hidden canvases that feed graphs to the 3D screens -->
+  <!-- Offscreen Canvases for 3D Monitors & Procedural Textures -->
   <div class="offscreen-canvas">
     <canvas id="liChartCanvas" width="512" height="384"></canvas>
     <canvas id="specChartCanvas" width="512" height="384"></canvas>
+    <canvas id="floorCanvas" width="256" height="256"></canvas>
+    <canvas id="breadboardCanvas" width="256" height="256"></canvas>
   </div>
 
-  <!-- 3D VR SCENE -->
-  <a-scene xr-mode-ui="XRMode: xr">
+  <a-scene xr-mode-ui="XRMode: xr" renderer="antialias: true; colorManagement: true;">
 
-    <!-- Lights -->
-    <a-entity light="type: ambient; color: #777; intensity: 1"></a-entity>
-    <a-entity light="type: point; color: #fff; intensity: 1.2" position="0 3.2 -1"></a-entity>
+    <!-- ========================================== -->
+    <!-- 1. LIGHTING (Authentic Lab Illumination)  -->
+    <!-- ========================================== -->
+    <a-entity light="type: ambient; color: #8899aa; intensity: 0.75"></a-entity>
+    <a-entity light="type: directional; color: #ffffff; intensity: 0.85" position="1 4 2"></a-entity>
+    <a-entity light="type: point; color: #38bdf8; intensity: 0.6; distance: 4" position="0 1.5 -1.2"></a-entity>
 
-    <!-- Lab Room (Floor, Ceiling, Walls) -->
-    <a-plane position="0 0 0" rotation="-90 0 0" width="10" height="10" color="#262d3d"></a-plane>
-    <a-plane position="0 3.5 0" rotation="90 0 0" width="10" height="10" color="#111827"></a-plane>
-    <a-box position="0 1.75 -5" width="10" height="3.5" depth="0.1" color="#1f2735"></a-box>
-    <a-box position="0 1.75 5" width="10" height="3.5" depth="0.1" color="#1f2735"></a-box>
-    <a-box position="-5 1.75 0" width="0.1" height="3.5" depth="10" color="#18202d"></a-box>
-    <a-box position="5 1.75 0" width="0.1" height="3.5" depth="10" color="#18202d"></a-box>
+    <!-- ========================================== -->
+    <!-- 2. LAB ROOM (Floor, Walls, Ceiling)       -->
+    <!-- ========================================== -->
+    <!-- Lab Tiled Floor -->
+    <a-plane id="lab-floor" position="0 0 0" rotation="-90 0 0" width="12" height="12" material="src: #floorCanvas; repeat: 12 12; roughness: 0.3"></a-plane>
+    <!-- Ceiling -->
+    <a-plane position="0 3.6 0" rotation="90 0 0" width="12" height="12" color="#0f172a"></a-plane>
+    <!-- Fluorescent Light Tubes -->
+    <a-box position="0 3.55 -1.2" width="0.3" height="0.05" depth="3.5" color="#ffffff" material="emissive: #e0f2fe; emissiveIntensity: 1"></a-box>
+    <a-box position="-3 3.55 -1.2" width="0.3" height="0.05" depth="3.5" color="#ffffff" material="emissive: #e0f2fe; emissiveIntensity: 0.8"></a-box>
+    <a-box position="3 3.55 -1.2" width="0.3" height="0.05" depth="3.5" color="#ffffff" material="emissive: #e0f2fe; emissiveIntensity: 0.8"></a-box>
 
-    <!-- Laser Safety Warning Sign -->
-    <a-box position="0 2.4 -4.9" width="1.2" height="0.7" depth="0.02" color="#f59e0b">
-      <a-text value="CAUTION: LASER LAB\nAVOID DIRECT EYE EXPOSURE" align="center" position="0 0 0.02" width="2" color="#000"></a-text>
+    <!-- Lab Walls with Lower Wainscot Baseboard -->
+    <!-- Front/North Wall -->
+    <a-box position="0 2.2 -5.5" width="12" height="2.8" depth="0.1" color="#1e293b"></a-box>
+    <a-box position="0 0.4 -5.48" width="12" height="0.8" depth="0.1" color="#0f172a"></a-box>
+
+    <!-- Back/South Wall -->
+    <a-box position="0 1.8 5.5" width="12" height="3.6" depth="0.1" color="#1e293b"></a-box>
+    <!-- Left/West Wall -->
+    <a-box position="-5.5 1.8 0" width="0.1" height="3.6" depth="12" color="#172033"></a-box>
+    <!-- Right/East Wall -->
+    <a-box position="5.5 1.8 0" width="0.1" height="3.6" depth="12" color="#172033"></a-box>
+
+    <!-- Laser Warning Safety Sign -->
+    <a-box position="0 2.6 -5.44" width="1.4" height="0.85" depth="0.02" color="#f59e0b">
+      <a-text value="DANGER: LASER LAB\nAVOID DIRECT EYE EXPOSURE\nCLASS 3B SEMICONDUCTOR LASER" 
+              align="center" position="0 0 0.02" width="2.2" color="#000000" font="roboto" style="bold"></a-text>
     </a-box>
+    <!-- Storage Counter & Equipment (Right side of room) -->
+    <a-box position="4.2 0.45 -1.5" width="1.2" height="0.9" depth="3" color="#334155" roughness="0.5"></a-box>
+    <a-box position="4.2 0.98 -1.8" width="0.4" height="0.22" depth="0.3" color="#0f172a">
+      <a-plane position="-0.08 0.02 0.152" width="0.18" height="0.12" color="#0284c7"></a-plane>
+    </a-box>
+    <a-box position="4.2 0.96 -1.1" width="0.35" height="0.18" depth="0.25" color="#475569"></a-box>
 
-    <!-- Side Bench / Counter -->
-    <a-box position="3.8 0.45 -1.2" width="1.2" height="0.9" depth="2.5" color="#334155"></a-box>
+    <!-- ========================================== -->
+    <!-- 3. CENTRAL OPTICAL BREADBOARD SETUP       -->
+    <!-- ========================================== -->
+    <a-entity position="0 0 -1.4">
+      <!-- Optical Table Bed with Threaded Grid Texture -->
+      <a-box position="0 0.85 0" width="2.5" height="0.08" depth="1.25" color="#1e2430"></a-box>
+      <a-plane id="optical-breadboard" position="0 0.891 0" rotation="-90 0 0" width="2.46" height="1.21" 
+               material="src: #breadboardCanvas; repeat: 16 8; roughness: 0.3; metalness: 0.7"></a-plane>
 
-    <!-- CENTRAL OPTICAL TABLE -->
-    <a-entity position="0 0 -1.5">
-      <!-- Breadboard Tabletop & Legs -->
-      <a-box position="0 0.85 0" width="2.4" height="0.08" depth="1.2" color="#111827"></a-box>
-      <a-cylinder position="-1 0.42 -0.45" radius="0.05" height="0.85" color="#0f172a"></a-cylinder>
-      <a-cylinder position="1 0.42 -0.45" radius="0.05" height="0.85" color="#0f172a"></a-cylinder>
-      <a-cylinder position="-1 0.42 0.45" radius="0.05" height="0.85" color="#0f172a"></a-cylinder>
-      <a-cylinder position="1 0.42 0.45" radius="0.05" height="0.85" color="#0f172a"></a-cylinder>
+      <!-- Table Legs -->
+      <a-cylinder position="-1.1 0.42 -0.5" radius="0.05" height="0.85" color="#0a0e17" metalness="0.8"></a-cylinder>
+      <a-cylinder position="1.1 0.42 -0.5" radius="0.05" height="0.85" color="#0a0e17" metalness="0.8"></a-cylinder>
+      <a-cylinder position="-1.1 0.42 0.5" radius="0.05" height="0.85" color="#0a0e17" metalness="0.8"></a-cylinder>
+      <a-cylinder position="1.1 0.42 0.5" radius="0.05" height="0.85" color="#0a0e17" metalness="0.8"></a-cylinder>
 
-      <!-- Laser Driver Unit with LCD Screen -->
-      <a-box position="-0.75 1.05 -0.2" width="0.45" height="0.25" depth="0.3" color="#334155">
-        <a-text value="LD CONTROLLER" position="-0.18 0.09 0.16" width="0.7" color="#cbd5e1"></a-text>
-        <a-plane position="0 0.01 0.155" width="0.36" height="0.1" color="#020617">
-          <a-text id="lcd-display" value="I: 0.0 mA\nP: 0.00 mW" position="-0.15 0 0.01" width="0.8" color="#22c55e"></a-text>
+      <!-- Laser Controller Unit -->
+      <a-box position="-0.75 1.05 -0.2" width="0.45" height="0.26" depth="0.32" color="#334155">
+        <a-text value="LD CONTROLLER" position="-0.19 0.09 0.165" width="0.7" color="#cbd5e1"></a-text>
+        <a-plane position="0 0.01 0.165" width="0.38" height="0.11" color="#020617">
+          <a-text id="lcd-display" value="I: 0.0 mA\nP: 0.00 mW" position="-0.16 0 0.01" width="0.85" color="#22c55e"></a-text>
         </a-plane>
       </a-box>
 
+      <!-- Optical Rail & Mounts -->
+      <a-box position="0.1 0.905 0" width="1.2" height="0.02" depth="0.08" color="#475569" metalness="0.8"></a-box>
+
       <!-- Laser Diode Mount -->
-      <a-cylinder position="-0.35 0.95 0" radius="0.02" height="0.12" color="#64748b"></a-cylinder>
-      <a-cylinder position="-0.35 1.02 0" radius="0.04" height="0.15" rotation="0 0 90" color="#475569"></a-cylinder>
+      <a-cylinder position="-0.35 0.96 0" radius="0.018" height="0.12" color="#94a3b8" metalness="0.7"></a-cylinder>
+      <a-cylinder position="-0.35 1.03 0" radius="0.04" height="0.14" rotation="0 0 90" color="#334155"></a-cylinder>
+      <a-circle position="-0.279 1.03 0" radius="0.012" rotation="0 90 0" color="#000000"></a-circle>
 
       <!-- Collimating Lens -->
-      <a-cylinder position="-0.05 0.95 0" radius="0.02" height="0.12" color="#64748b"></a-cylinder>
-      <a-torus position="-0.05 1.02 0" radius="0.035" radius-tubular="0.007" rotation="0 90 0" color="#334155"></a-torus>
-      <!-- Photodetector Sensor -->
-      <a-cylinder position="0.55 0.95 0" radius="0.02" height="0.12" color="#64748b"></a-cylinder>
-      <a-cylinder position="0.55 1.02 0" radius="0.045" height="0.15" rotation="0 0 90" color="#334155"></a-cylinder>
+      <a-cylinder position="-0.05 0.96 0" radius="0.018" height="0.12" color="#94a3b8" metalness="0.7"></a-cylinder>
+      <a-torus position="-0.05 1.03 0" radius="0.035" radius-tubular="0.006" rotation="0 90 0" color="#1e293b"></a-torus>
+      <a-circle position="-0.05 1.03 0" radius="0.029" rotation="0 90 0" color="#93c5fd" opacity="0.4" transparent="true"></a-circle>
 
-      <!-- Red Laser Beam (Grows bright when lasing) -->
-      <a-cylinder id="laser-beam" position="0.1 1.02 0" rotation="0 0 90" radius="0.003" height="0.8" color="#ff0000" material="shader: flat; opacity: 0.0; transparent: true"></a-cylinder>
+      <!-- Photodetector Sensor -->
+      <a-cylinder position="0.55 0.96 0" radius="0.018" height="0.12" color="#94a3b8" metalness="0.7"></a-cylinder>
+      <a-cylinder position="0.55 1.03 0" radius="0.045" height="0.14" rotation="0 0 90" color="#334155"></a-cylinder>
+      <a-circle position="0.479 1.03 0" radius="0.03" rotation="0 -90 0" color="#050811"></a-circle>
+
+      <!-- Active Coherent Laser Beam -->
+      <a-cylinder id="laser-beam" position="0.1 1.03 0" rotation="0 0 90" radius="0.0032" height="0.75" color="#ef4444" material="shader: flat; opacity: 0.0; transparent: true"></a-cylinder>
 
       <!-- 3D Monitor 1: L-I Curve -->
       <a-entity position="-0.45 1.5 -0.35" rotation="10 12 0">
         <a-box width="0.65" height="0.48" depth="0.02" color="#1e293b"></a-box>
         <a-plane id="li-screen" position="0 0 0.012" width="0.61" height="0.44" material="src: #liChartCanvas; shader: flat;"></a-plane>
       </a-entity>
-
-      <!-- 3D Monitor 2: Spectrum -->
-      <a-entity position="0.35 1.5 -0.35" rotation="10 -12 0">
+      <!-- 3D Monitor 2: Optical Spectrum -->
+      <a-entity position="0.38 1.5 -0.35" rotation="10 -12 0">
         <a-box width="0.65" height="0.48" depth="0.02" color="#1e293b"></a-box>
         <a-plane id="spec-screen" position="0 0 0.012" width="0.61" height="0.44" material="src: #specChartCanvas; shader: flat;"></a-plane>
       </a-entity>
 
-      <!-- Clickable Control Buttons on Table -->
-      <a-entity position="0 0.95 0.4">
-        <!-- -5 mA -->
-        <a-box id="btn-decrease" class="clickable" position="-0.22 0 0" width="0.14" height="0.04" depth="0.08" color="#ef4444">
+      <!-- Interactive Current Controller Buttons -->
+      <a-entity position="0 0.96 0.42">
+        <a-box id="btn-decrease" class="clickable" position="-0.24 0 0" width="0.13" height="0.04" depth="0.08" color="#ef4444">
           <a-text value="- 5 mA" align="center" position="0 0.025 0" rotation="-90 0 0" width="0.8" color="#ffffff"></a-text>
         </a-box>
-        <!-- +1 mA -->
-        <a-box id="btn-step-fine" class="clickable" position="-0.06 0 0" width="0.14" height="0.04" depth="0.08" color="#0284c7">
+        <a-box id="btn-step-fine" class="clickable" position="-0.08 0 0" width="0.13" height="0.04" depth="0.08" color="#0284c7">
           <a-text value="+ 1 mA" align="center" position="0 0.025 0" rotation="-90 0 0" width="0.8" color="#ffffff"></a-text>
         </a-box>
-        <!-- +5 mA -->
-        <a-box id="btn-increase" class="clickable" position="0.1 0 0" width="0.14" height="0.04" depth="0.08" color="#10b981">
+        <a-box id="btn-increase" class="clickable" position="0.08 0 0" width="0.13" height="0.04" depth="0.08" color="#10b981">
           <a-text value="+ 5 mA" align="center" position="0 0.025 0" rotation="-90 0 0" width="0.8" color="#ffffff"></a-text>
         </a-box>
-        <!-- RESET -->
-        <a-box id="btn-reset" class="clickable" position="0.25 0 0" width="0.12" height="0.04" depth="0.08" color="#64748b">
+        <a-box id="btn-reset" class="clickable" position="0.24 0 0" width="0.11" height="0.04" depth="0.08" color="#64748b">
           <a-text value="RESET" align="center" position="0 0.025 0" rotation="-90 0 0" width="0.7" color="#ffffff"></a-text>
         </a-box>
       </a-entity>
     </a-entity>
 
-    <!-- THEORY & LIVE STATUS WHITEBOARD (Left side of bench) -->
-    <a-entity position="-1.9 1.7 -1.3" rotation="0 38 0">
-      <a-box position="0 0 0" width="1.6" height="1.4" depth="0.03" color="#0f172a"></a-box>
-      <a-plane position="0 0 0.016" width="1.54" height="1.34" color="#ffffff"></a-plane>
+    <!-- ========================================================= -->
+    <!-- 4. DUAL-PANEL HUD: THEORY & STATUS (No More Overlapping!) -->
+    <!-- ========================================================= -->
+    <a-entity position="-1.9 1.65 -1.3" rotation="0 35 0">
+      
+      <!-- Top Card: Theory & Concept -->
+      <a-entity position="0 0.35 0">
+        <a-box width="1.6" height="0.8" depth="0.03" color="#0f172a"></a-box>
+        <a-plane position="0 0 0.016" width="1.54" height="0.74" color="#ffffff"></a-plane>
+        
+        <a-text value="CHARACTERIZATION THEORY" position="-0.72 0.28 0.02" width="1.5" color="#0284c7" font="roboto" style="bold"></a-text>
+        <a-text value="1. L-I Characteristic Curve:\n   - Sub-threshold (I < 25 mA): Spontaneous emission (LED mode).\n   - Threshold (Ith = 25 mA): Stimulated emission begins.\n   - Lasing: Sharp linear slope efficiency (dP/dI).\n\n2. Spectral Narrowing:\n   - Wide emission band (FWHM ~35nm) collapses into an intense\n     coherent peak (<1nm) once population inversion is reached."
+                position="-0.72 0.18 0.02" width="1.4" color="#1e293b" baseline="top"></a-text>
+      </a-entity>
 
-      <a-text value="EXPERIMENT THEORY & STATUS" position="-0.72 0.58 0.02" width="1.4" color="#0f172a" style="bold"></a-text>
-      <a-text value="1. L-I Characteristic:\n   - Below Ith (25mA): Weak spontaneous emission (LED mode).\n   - Above Ith: Stimulated emission causes sharp linear rise in power.\n\n2. Spectral Narrowing:\n   - Broad spectrum below threshold (FWHM ~35nm).\n   - Collapses into a sharp peak (<1nm) once lasing starts."
-              position="-0.72 0.22 0.02" width="1.35" color="#1e293b" baseline="top"></a-text>
+      <!-- Bottom Card: Live Measurement & State (Separate board) -->
+      <a-entity position="0 -0.3 0">
+        <a-box width="1.6" height="0.45" depth="0.03" color="#0369a1"></a-box>
+        <a-plane position="0 0 0.016" width="1.54" height="0.39" color="#0f172a"></a-plane>
+        
+        <a-text value="LIVE EXPERIMENT OBSERVATION" position="-0.72 0.13 0.02" width="1.4" color="#38bdf8" font="roboto" style="bold"></a-text>
+        <a-text id="live-state-title" value="CURRENT EMISSION: [SYSTEM OFF / IDLE]" position="-0.72 0.04 0.02" width="1.3" color="#22c55e" baseline="top"></a-text>
+        <a-text id="live-state-desc" value="Injection Current: 0.0 mA | Threshold: 25.0 mA\nClick '+5 mA' or '+1 mA' on the table to start characterization." 
+                position="-0.72 -0.06 0.02" width="1.35" color="#cbd5e1" baseline="top"></a-text>
+      </a-entity>
 
-      <!-- Live state text -->
-      <a-plane position="0 -0.42 0.02" width="1.44" height="0.38" color="#f1f5f9">
-        <a-text id="theory-live-status" value="STATE: [OFF]\nClick buttons to inject current." position="-0.68 0.1 0.01" width="1.3" color="#0369a1" baseline="top"></a-text>
-      </a-plane>
     </a-entity>
 
-    <!-- VR RIG (Lets you walk around in VR & Desktop) -->
-    <a-entity id="rig" movement-controls="fly: false; speed: 0.14" position="0 0 0.3">
-      <a-entity id="camera" camera position="0 1.6 0" look-controls>
+    <!-- ========================================== -->
+    <!-- 5. VR RIG & CAMERA (Perfect Viewing Angle) -->
+    <!-- ========================================== -->
+    <a-entity id="rig" movement-controls="fly: false; speed: 0.14" position="0 0 0.4">
+      <a-entity id="camera" camera position="0 1.55 0" look-controls>
         <a-cursor id="cursor" raycaster="objects: .clickable" cursor="fuse: false" color="#38bdf8"></a-cursor>
       </a-entity>
-      <!-- Hand Controllers with ray lasers -->
       <a-entity oculus-touch-controls="hand: left" laser-controls="hand: left" raycaster="objects: .clickable; lineColor: #38bdf8"></a-entity>
       <a-entity oculus-touch-controls="hand: right" laser-controls="hand: right" raycaster="objects: .clickable; lineColor: #38bdf8"></a-entity>
     </a-entity>
