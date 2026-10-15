@@ -1,0 +1,38 @@
+
+/* Reset margins so the 3D room takes the full screen */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #05070c;
+  font-family: sans-serif;
+}
+
+/* Hide the 2D background graph canvases so they only show on 3D VR monitors */
+.offscreen-canvas {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  visibility: hidden;
+}
+
+/* Top instruction card on desktop/mobile screens */
+.guide-box {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  z-index: 10;
+  background: rgba(15, 23, 42, 0.85);
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Automatically hide 2D instructions when VR headset mode starts */
+.a-in-vr .guide-box {
+  display: none !important;
+}
