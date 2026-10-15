@@ -21,3 +21,4 @@ Fill a brief description of this experiment here
 SrNo | Name | Faculty or Student | Department| Institute | Email id
 :--|:--|:--|:--|:--|:--|
 1 | Krish Jaiswal | Student | I.T. | Rajkiya Engineering College, Banda | krishjais983@gmail.com
+2 | Ayush Gupta | Student | I.T. | Rajkiya Engineering College, Banda | ayushgupta26th@gmail.com
