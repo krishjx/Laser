@@ -1,0 +1,70 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #07090e;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  user-select: none;
+}
+
+.offscreen-canvas {
+  position: fixed;
+  left: -9999px;
+  top: -9999px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.guide-box {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  background: rgba(15, 23, 42, 0.9);
+  color: #f1f5f9;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+}
+
+.a-in-vr .guide-box {
+  display: none !important;
+}
+
+.quick-controls {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.ctrl-btn {
+  border: none;
+  border-radius: 5px;
+  color: #ffffff;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.1s ease, filter 0.1s ease;
+  user-select: none;
+}
+
+.ctrl-btn:hover {
+  filter: brightness(1.2);
+  transform: translateY(-1px);
+}
+
+.ctrl-btn:active {
+  transform: translateY(1px);
+}
+
+.btn-red { background-color: #ef4444; }
+.btn-blue { background-color: #0284c7; }
+.btn-green { background-color: #10b981; }
+.btn-gray { background-color: #64748b; }
